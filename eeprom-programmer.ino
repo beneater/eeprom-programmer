@@ -25,8 +25,8 @@ byte readEEPROM(int address) {
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     pinMode(pin, INPUT);
   }
-
   setAddress(address, /*outputEnable*/ true);
+
   byte data = 0;
   for (int pin = EEPROM_D7; pin >= EEPROM_D0; pin -= 1) {
     data = (data << 1) + digitalRead(pin);
@@ -39,11 +39,11 @@ byte readEEPROM(int address) {
  * Write a byte to the EEPROM at the specified address.
  */
 void writeEEPROM(int address, byte data) {
+  setAddress(address, /*outputEnable*/ false);
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     pinMode(pin, OUTPUT);
   }
 
-  setAddress(address, /*outputEnable*/ false);
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     digitalWrite(pin, data & 1);
     data = data >> 1;
