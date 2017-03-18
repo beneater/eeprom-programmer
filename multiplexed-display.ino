@@ -78,6 +78,72 @@ void printContents() {
   }
 }
 
+void programmEEPROM() {
+	byte digits[] = { 0x7e, 0x30, 0x6d, 0x79, 0x33, 0x5b, 0x5f, 0x70, 0x7f, 0x7b };
+	byte minusSign = 0x01;
+
+	int progressStep = 16;
+	Serial.println("Programming EEPROM:");
+
+	// Go over all inputs
+	for (byte i = 0; i < 256; i++) {
+		if (i % progressStep == 0) {
+			Serial.print((i / 256) * 100);
+      Serial.println("%");
+		}
+
+		// Non two's complement part
+		{
+			int d2 = (i / 100) % 10; // 2nd 7segment display (hundreds)
+			int d3 = (i / 10) % 10; // 3rd 7segment display (tenths)
+			writeEEPROM(i + 512 + 256, 0); // clear first 7segment display
+			writeEEPROM(i + 512, (d2 == 0) ? 0 : digits[d2]); // write the digit or clear if 0
+			writeEEPROM(i + 256, (d2 == 0 && d3 == 0) ? 0 : digits[d3]); // write the digit or clear if d3 and d2 are 0
+			writeEEPROM(i, digits[i % 10]); // write the digit even 0
+		}
+		// two's complement
+		{
+			int value = i - 128; //real value as two's complement
+			if (value >= 0) { // same as above
+				int d2 = (value / 100) % 10; // 2nd 7segment display (hundreds)
+				int d3 = (value / 10) % 10; // 3rd 7segment display (tenths)
+				writeEEPROM(value + 1024 + 512 + 256, 0); // clear first 7segment display
+				writeEEPROM(value + 1024 + 512, (d2 == 0) ? 0 : digits[d2]); // write the digit or clear if 0
+				writeEEPROM(value + 1024 + 256, (d2 == 0 && d3 == 0) ? 0 : digits[d3]); // write the digit or clear if d3 and d2 are 0
+				writeEEPROM(value + 1024, digits[i % 10]); // write the digit including 0
+			} else {
+				// Example
+				// d1 d2 d3 d4
+				//  -  1  2  3
+				//     -  4  2
+				//        -  7
+
+				int d2 = (abs(value) / 100) % 10; //hundreds
+				int d3 = (abs(value) / 10) % 10; //tenths
+				int d4 = abs(value) % 10; //ones
+
+				//first 7segment display
+				writeEEPROM(i + 1024 + 512 + 265, d2 == 0 ? 0 : minusSign); //write a minus sign to the first 7segment display if the second 7segment display isn't clear
+				
+				//second 7segment display
+				if (d2 == 0 && d3 == 0) { // if the minus sign is further right
+					writeEEPROM(i + 1024 + 512, 0); // clear second 7segment display
+				} else {
+					writeEEPROM(i + 1024 + 512, d2 == 0 ? minusSign : digits[d2]);
+				}
+
+				// third 7segment display
+				writeEEPROM(i + 1024 + 256, (d2 == 0 && d3 == 0) ? minusSign : digits[d3]); // write a minus sign if both the second and the third 7segment display are clear
+
+				// last 7segment display
+				writeEEPROM(i + 1024, digits[d4]); // always write the last digit (ones)
+
+			}
+		}
+	}
+	Serial.println("Finished");
+}
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -88,47 +154,7 @@ void setup() {
   pinMode(WRITE_EN, OUTPUT);
   Serial.begin(57600);
 
-
-  // Bit patterns for the digits 0..9
-  byte digits[] = { 0x7e, 0x30, 0x6d, 0x79, 0x33, 0x5b, 0x5f, 0x70, 0x7f, 0x7b };
-
-  Serial.println("Programming ones place");
-  for (int value = 0; value <= 255; value += 1) {
-    writeEEPROM(value, digits[value % 10]);
-  }
-  Serial.println("Programming tens place");
-  for (int value = 0; value <= 255; value += 1) {
-    writeEEPROM(value + 256, digits[(value / 10) % 10]);
-  }
-  Serial.println("Programming hundreds place");
-  for (int value = 0; value <= 255; value += 1) {
-    writeEEPROM(value + 512, digits[(value / 100) % 10]);
-  }
-  Serial.println("Programming sign");
-  for (int value = 0; value <= 255; value += 1) {
-    writeEEPROM(value + 768, 0);
-  }
-
-  Serial.println("Programming ones place (twos complement)");
-  for (int value = -128; value <= 127; value += 1) {
-    writeEEPROM((byte)value + 1024, digits[abs(value) % 10]);
-  }
-  Serial.println("Programming tens place (twos complement)");
-  for (int value = -128; value <= 127; value += 1) {
-    writeEEPROM((byte)value + 1280, digits[abs(value / 10) % 10]);
-  }
-  Serial.println("Programming hundreds place (twos complement)");
-  for (int value = -128; value <= 127; value += 1) {
-    writeEEPROM((byte)value + 1536, digits[abs(value / 100) % 10]);
-  }
-  Serial.println("Programming sign (twos complement)");
-  for (int value = -128; value <= 127; value += 1) {
-    if (value < 0) {
-      writeEEPROM((byte)value + 1792, 0x01);
-    } else {
-      writeEEPROM((byte)value + 1792, 0);
-    }
-  }
+  programmEEPROM();
 
   // Read and print out the contents of the EERPROM
   Serial.println("Reading EEPROM");
