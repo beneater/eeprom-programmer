@@ -30,9 +30,9 @@ uint16_t data[] = {
   MI|CO,  RO|II|CE,  IO|MI,  RO|AI,  0,         0, 0, 0,   // 0001 - LDA
   MI|CO,  RO|II|CE,  IO|MI,  RO|BI,  EO|AI,     0, 0, 0,   // 0010 - ADD
   MI|CO,  RO|II|CE,  IO|MI,  RO|BI,  EO|AI|SU,  0, 0, 0,   // 0011 - SUB
-  MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 0100
-  MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 0101
-  MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 0110
+  MI|CO,  RO|II|CE,  IO|MI,  AO|RI,  0,         0, 0, 0,   // 0100 - STA
+  MI|CO,  RO|II|CE,  IO|AI,  0,      0,         0, 0, 0,   // 0101 - LDI
+  MI|CO,  RO|II|CE,  IO|J,   0,      0,         0, 0, 0,   // 0110 - JMP
   MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 0111
   MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 1000
   MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 1001
