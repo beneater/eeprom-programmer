@@ -136,7 +136,8 @@ void programEEPROM(uint16_t data[], int offset, int length, bool highByte)
 {
   Serial.println("Programming EEPROM");
   for (int address = 0x0000; address < length; address++){
-    writeEEPROM(address + offset, data[address] >> (highByte ? 8 : 0));
+    byte value = data[address] >> (highByte ? 8 : 0);
+    writeEEPROM(address + offset, value);
 
     if (address % 0x40 == 0x00) {
       Serial.print(".");
