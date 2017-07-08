@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace multiplexed_display.tests
 {
     [TestClass]
-    public class UnitTest1
+    public class DisplayTests
     {
         private readonly char[] _digits = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
         private const char Blank = ' ';
@@ -119,28 +119,43 @@ namespace multiplexed_display.tests
             Assert.AreEqual("  -1", Display(255, data));
         }
 
+        private static uint BinaryToGray(uint num)
+        {
+            return num ^ (num >> 1);
+        }
+
+        private static uint GrayToBinary32(uint num)
+        {
+            num = num ^ (num >> 16);
+            num = num ^ (num >> 8);
+            num = num ^ (num >> 4);
+            num = num ^ (num >> 2);
+            num = num ^ (num >> 1);
+            return num;
+        }
+
         [TestMethod]
         public void GrayTest()
         {
             var data = new char[0x400];
 
-            for (var i = 0; i < 0x100; i++)
+            for (var gray = 0x000; gray < 0x100; gray++)
             {
-                var value = i ^ (i >> 1);
+                var binary = GrayToBinary32((uint)gray);
 
-                var d2 = value / 100 % 10; // 2nd 7segment display (hundreds)
-                var d3 = value / 10 % 10; // 3rd 7segment display (tenths)
-                data[i + 0x300] = Blank; // clear first 7segment display
-                data[i + 0x200] = d2 == 0 ? Blank : _digits[d2]; // write the digit or clear if 0
-                data[i + 0x100] = d2 == 0 && d3 == 0 ? Blank : _digits[d3]; // write the digit or clear if d3 and d2 are 0
-                data[i + 0x000] = _digits[i % 10]; // write the digit even 0
+                var d2 = binary / 100 % 10; // 2nd 7segment display (hundreds)
+                var d3 = binary / 10 % 10; // 3rd 7segment display (tenths)
+                data[gray + 0x300] = Blank; // clear first 7segment display
+                data[gray + 0x200] = d2 == 0 ? Blank : _digits[d2]; // write the digit or clear if 0
+                data[gray + 0x100] = d2 == 0 && d3 == 0 ? Blank : _digits[d3]; // write the digit or clear if d3 and d2 are 0
+                data[gray + 0x000] = _digits[binary % 10]; // write the digit even 0
             }
 
-            Assert.AreEqual("   0", Display(0, data));
-            Assert.AreEqual("   7", Display(7, data));
-            Assert.AreEqual("  26", Display(16, data));
-            Assert.AreEqual("  80", Display(100, data));
-            Assert.AreEqual(" 125", Display(255, data));
+            for (var binary = 0x000; binary < 0x100; binary++)
+            {
+                var gray = BinaryToGray((uint)binary);
+                Assert.AreEqual($"{binary,4:##0}", Display((int)gray, data));
+            }
         }
 
         [TestMethod]
