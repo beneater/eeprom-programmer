@@ -67,6 +67,27 @@ void writeEEPROM(int address, byte data) {
 }
 
 
+/**
+ * Clear out the entire EEPROM
+ */
+void eraseEEPROM(int address, int length)
+{
+  char data[80];
+  sprintf(data, "Erasing EEPROM, Start 0x%04x, Length 0x%04x", address, length);
+  Serial.println(data);
+  for (int offset = 0x0000; offset < length; offset++) {
+    writeEEPROM(address + offset, 0xff);
+
+    if (offset % 0x40 == 0x00) {
+      Serial.print(".");
+    }
+  }
+  Serial.println();
+  Serial.println("Erasing EEPROM -- Done.");
+  Serial.println();
+}
+
+
 /*
    Read the contents of the EEPROM and print them to the serial monitor.
 */
@@ -164,9 +185,11 @@ void programEEPROM()
 
 
 void setup() {
-  // put your setup code here, to run once:
+  // put your setup code here, to run once: 
   pinMode(SHIFT_DATA, OUTPUT);
   pinMode(SHIFT_CLK, OUTPUT);
+
+  digitalWrite(SHIFT_LATCH, LOW);
   pinMode(SHIFT_LATCH, OUTPUT);
 
   digitalWrite(WRITE_EN, HIGH);
@@ -175,21 +198,15 @@ void setup() {
   Serial.begin(57600);
 
   // Clear and program the EEPROM
-  // eraseEEPROM();
+  // eraseEEPROM(0x0600, 0x0100);
   programEEPROM();
-
+  
+  
   // Read and print out the contents of the EERPROM
   Serial.println("Reading EEPROM");
-  printContents(0x0000);
-  printContents(0x0100);
-  printContents(0x0200);
-  printContents(0x0300);
-  printContents(0x0400);
-  printContents(0x0500);
-  printContents(0x0600);
-  printContents(0x0700);
+  for (int address = 0x0000; address < 0x0800; address += 0x0100)
+    printContents(address);
 }
-
 
 void loop() {
   // put your main code here, to run repeatedly:
