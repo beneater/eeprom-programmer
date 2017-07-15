@@ -154,7 +154,7 @@ void programEEPROM(uint16_t data[], int offset, int length, bool highByte)
 void printContents(int address) {
   for (int base = 0x0000; base < 0x0100; base += 0x10) {
     char buf[20];
-    sprintf(buf, "0x%04x: e", address + base);
+    sprintf(buf, "0x%04x: ", address + base);
     Serial.print(buf);
     for (int offset = 0; offset < 0x10; offset += 0x01) {
       byte data = readEEPROM(address + base + offset);
