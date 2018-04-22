@@ -25,7 +25,7 @@
 #define CO  0b0000000000000100  // Program counter out
 #define J   0b0000000000000010  // Jump (program counter in)
 
-uint16_t data[] = {
+uint16_t data[128] = {
   MI|CO,  RO|II|CE,  0,      0,      0,         0, 0, 0,   // 0000 - NOP
   MI|CO,  RO|II|CE,  IO|MI,  RO|AI,  0,         0, 0, 0,   // 0001 - LDA
   MI|CO,  RO|II|CE,  IO|MI,  RO|BI,  EO|AI,     0, 0, 0,   // 0010 - ADD
@@ -128,7 +128,7 @@ void setup() {
   Serial.print("Programming EEPROM");
 
   // Program the 8 high-order bits of microcode into the first 128 bytes of EEPROM
-  for (int address = 0; address < sizeof(data)/sizeof(data[0]); address += 1) {
+  for (int address = 0; address < 128; address += 1) {
     writeEEPROM(address, data[address] >> 8);
 
     if (address % 64 == 0) {
@@ -137,7 +137,7 @@ void setup() {
   }
 
   // Program the 8 low-order bits of microcode into the second 128 bytes of EEPROM
-  for (int address = 0; address < sizeof(data)/sizeof(data[0]); address += 1) {
+  for (int address = 0; address < 128; address += 1) {
     writeEEPROM(address + 128, data[address]);
 
     if (address % 64 == 0) {
