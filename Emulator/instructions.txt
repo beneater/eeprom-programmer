@@ -1,0 +1,41 @@
+command binary     discription
+
+HALT()  0000 0001  halt the computer
+DSPA()  0000 0010  display A register on display
+DSPB()  0000 0011  display B register on display
+DSPC()  0000 0100  display C register on display
+CPAB()  0000 0101  copy A register to B register
+CPAC()  0000 0110  copy A register to C register
+CPBA()  0000 0111  copy B register to A register
+CPBC()  0000 1000  copy B register to C register
+CPCA()  0000 1001  copy C register to A register
+CPCB()  0000 1010  copy C register to B register
+ZEROB() 0000 1011  store zero in B register
+ZEROC() 0000 1100  store zero in C register
+ADDB()  0000 1101  store sum of A register and
+		   B register in B register
+SUBB()  0000 1110  store diff from B register to
+		   A register in B register
+RET()   0000 1111  return out of subroutine
+RETA()  0001 OPT   return out of subroutine,
+		   store OPT memory in A register
+LDA()   0010 OPT   load OPT memory in A register
+LDI()   0011 OPT   load OPT value in A register
+STA()   0100 OPT   store A register in OPT memory
+SWBK()  0101 OPT   switch to BANK OPT
+SWP()   0110 OPT   swap A register with OPT memory
+ADD()   0111 OPT   add OPT memory to A register,
+		   sum is stored in A register
+SUB()   1000 OPT   diff A register to OPT memory,
+		   diff is stored in A register
+INC()   1001 OPT   increment A register by OPT
+DECR()  1010 OPT   decrement A register by OPT
+JMP()   1011 OPT   jump to operation OPT
+JC()    1100 OPT   jump to operation OPT,
+		   if carry flag is set
+JZ()    1101 OPT   jump to operation OPT,
+		   if zero flag is set
+CALLD() 1110 OPT   call subr., at A register top
+		   nibble as BANK, OPT as memory
+CALL()  1111 OPT   jump to BANK OPT, current
+		   BANK&PC are stored in C reg. 
