@@ -38,6 +38,17 @@ The code in [`/microcode-eeprom-programmer`](/microcode-eeprom-programmer) is fo
 The code in [`/microcode-eeprom-with-flags`](/microcode-eeprom-with-flags) adds functionality for a flags register to the microcode above to support conditional instructions. Again, you’ll likely want more context from the full series of videos, but here’s the video describing the code:
 - [Conditional jump instructions](https://youtu.be/Zg1NdPKoosU).
 
+### 5. 8-bit computer emulator
+The code in [`/Emulator`](/Emulator) implements an emulator that runs on an Arduino.
+There are two operation modes:
+1. USB-MODE no additional hardware is needed. All commands and output are handled via the USB-serial terminal.
+2. PERIPHERAL-MODE switches are used for the input and LEDs for the output. The Arduino between still handles the emulation.
+The code for both modi is the same. PIN D12 determine the mode. LOW = USB, HIGH = PERIPHERAL
+Additional features:
+- more [`Instructions`](/Emulator/instructions.txt)
+- more RAM with bank system
+- call register enables subroutines
+
 ## More information
 
 This EEPROM programmer was designed as part of a larger project to build an 8-bit computer from scratch. There’s a much larger [series of videos about this project](https://www.youtube.com/playlist?list=PLowKtXNTBypGqImE405J2565dvjafglHU) on YouTube as well. In all likelihood, if this repo interests you, you want to binge that whole playlist.
