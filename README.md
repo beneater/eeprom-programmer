@@ -44,6 +44,7 @@ There are two operation modes:
 1. USB-MODE no additional hardware is needed. All commands and output are handled via the USB-serial terminal.
 2. PERIPHERAL-MODE switches are used for the input and LEDs for the output. The Arduino between still handles the emulation.
 The code for both modi is the same. PIN D12 determine the mode. LOW = USB, HIGH = PERIPHERAL
+
 Additional features:
 - more [`Instructions`](/Emulator/instructions.txt)
 - more RAM with bank system
