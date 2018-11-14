@@ -1,6 +1,4 @@
 
-
-
 // Controll word components
 #define HLT 0b10000000000000000000000  // Halt clock
 #define MI  0b01000000000000000000000  // Memory address register in
@@ -58,6 +56,7 @@ int CLOCK_SPEED = 100;
 bool CLEAR_BEFOR_OUT = false;
 bool SKIP_NEXT_CLEAR = false;
 bool DISABLE_OUTPUT = false;
+bool DISABLE_MEMORYDUMP = true;
 
 // PINS
 #define PIN_OUTPUT_SET       2  // D02
@@ -119,6 +118,8 @@ void DSPA() //0000 0010
   BUS = REG_A;
   OUT_DISPLAY = BUS;
   INSTRUCTION_CYCLE = 0;
+  if (USB_MODE && DISABLE_OUTPUT)
+    printDisplay();
   output();
   waitForNextClockTick(false); 
 }
@@ -135,6 +136,8 @@ void DSPB() //0000 0011
   BUS = REG_B;
   OUT_DISPLAY = BUS;
   INSTRUCTION_CYCLE = 0;
+  if (USB_MODE && DISABLE_OUTPUT)
+    printDisplay();
   output();
   waitForNextClockTick(false);
 }
@@ -151,6 +154,8 @@ void DSPC() //0000 0100
   BUS = REG_C;
   OUT_DISPLAY = BUS;
   INSTRUCTION_CYCLE = 0;
+  if (USB_MODE && DISABLE_OUTPUT)
+    printDisplay();
   output();
   waitForNextClockTick(false);
 }
@@ -335,7 +340,7 @@ void RET() //0000 1111
   CONTROLLWORD = CBO|BKI;
   BUS = REG_C & 0xF0;
   BANK_ADDRESS = BUS >> 4;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
 
@@ -363,7 +368,7 @@ void RETA() //0001 OPT
   CONTROLLWORD = IO|MI;
   BUS = REG_INSTRUCTION & 0x0F;
   LOCAL_RAM_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
 
@@ -387,7 +392,7 @@ void RETA() //0001 OPT
   CONTROLLWORD = CBO|BKI;
   BUS = REG_C & 0xF0;
   BANK_ADDRESS = BUS >> 4;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
 
@@ -415,7 +420,7 @@ void LDA() //0010 OPT
   CONTROLLWORD = IO|MI;
   BUS = REG_INSTRUCTION & 0x0F;
   LOCAL_RAM_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
 
@@ -461,7 +466,7 @@ void STA() //0100 OPT
   CONTROLLWORD = IO|MI;
   BUS = REG_INSTRUCTION & 0x0F;
   LOCAL_RAM_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -472,8 +477,8 @@ void STA() //0100 OPT
   waitForNextClockTick(true);
   CONTROLLWORD = AO|RI|RSS;
   BUS = REG_A;
-  RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS] = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS] = BUS;
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   INSTRUCTION_CYCLE = 0;
   output();
   waitForNextClockTick(false);   
@@ -490,7 +495,7 @@ void SWBK() //0101 OPT
   CONTROLLWORD = IO|BKI|RSS;
   BUS = REG_INSTRUCTION & 0x0F;
   BANK_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   INSTRUCTION_CYCLE = 0;
   output();
   waitForNextClockTick(false);
@@ -507,7 +512,7 @@ void SWP() //0110 OPT
   CONTROLLWORD = IO|MI;
   BUS = REG_INSTRUCTION & 0x0F;
   LOCAL_RAM_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -530,8 +535,8 @@ void SWP() //0110 OPT
   waitForNextClockTick(true);
   CONTROLLWORD = AO|RI;
   BUS = REG_A;
-  RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS] = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS] = BUS;
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -560,7 +565,7 @@ void ADD() //0111 OPT
   CONTROLLWORD = IO|MI;
   BUS = REG_INSTRUCTION & 0x0F;
   LOCAL_RAM_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -602,7 +607,7 @@ void SUB() //1000 OPT
   CONTROLLWORD = IO|MI;
   BUS = REG_INSTRUCTION & 0x0F;
   LOCAL_RAM_ADDRESS = BUS;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -781,7 +786,7 @@ void CALLD() //1110 OPT
   CONTROLLWORD = AO|BKI;
   BUS = REG_A;
   BANK_ADDRESS = REG_A >> 4;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  RAM_OUTPUT = RAM[(BANK_ADDRESS << 4) | LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -820,8 +825,8 @@ void CALL() //1111 OPT
   waitForNextClockTick(true);
   CONTROLLWORD = IO|BKI;
   BUS = REG_INSTRUCTION & 0x0F;
-  BANK_ADDRESS = REG_A;
-  RAM_OUTPUT = RAM[BANK_ADDRESS|LOCAL_RAM_ADDRESS];
+  BANK_ADDRESS = BUS;
+  RAM_OUTPUT = RAM[(BANK_ADDRESS<<4)|LOCAL_RAM_ADDRESS];
   output();
   waitForNextClockTick(false);
   
@@ -857,12 +862,13 @@ void calcDiff(bool setFlags)
   if (!setFlags) // if flags not set, then return here
     return;
   // calculate flags
-  CARRY_FLAG = (REG_SUM < REG_A && REG_SUM < REG_B);
+  CARRY_FLAG = (REG_SUM > REG_A && REG_SUM > REG_B);
   ZERO_FLAG = (REG_SUM == 0);
 }
 
 void executeNextCommand()
 {
+//NOP()   //0000 0000
 //HALT()  //0000 0001
 //DSPA()  //0000 0010
 //DSPB()  //0000 0011
@@ -1046,12 +1052,12 @@ void usbWaitForNextClockTick(bool inverse)
       SKIP_NEXT_CLEAR = false;
     else
     {
-      Serial.println("###### computer halted ######");
-      Serial.println("1) enter programming mode");
-      Serial.println("2) dump memory");
-      Serial.println("3) clear halt");
-      Serial.println("4) output");;
-      Serial.println("9) reset");
+      Serial.println(F("###### COMPUTER HALTED ######"));
+      Serial.println(F("1) enter programming mode"));
+      Serial.println(F("2) dump memory"));
+      Serial.println(F("3) clear halt"));
+      Serial.println(F("4) output"));
+      Serial.println(F("9) reset"));
       Serial.println();
     }
     int userInput = readInt();
@@ -1082,8 +1088,11 @@ void usbWaitForNextClockTick(bool inverse)
     return;
   if (USB_MANUAL_CLOCK)
   {
-    Serial.println("Enter any key for next step.");
-    while (Serial.available() == 0); // wait for serial input
+    Serial.println(F("Enter any key for next step."));
+    //while (Serial.available() == 0) // wait for serial input
+    //{
+      readInt();
+    //}
   }
   else
     delay(CLOCK_SPEED);
@@ -1142,18 +1151,21 @@ void usbInput()
     {
       if (CLEAR_BEFOR_OUT)
         clearTerminal();
-      Serial.println("###### PROGRAMMING MODE ########");
-      Serial.println("1) enter memory value");
-      Serial.println("2) show value at");
-      Serial.println("3) dump memory");
+      Serial.println(F("###### PROGRAMMING MODE ########"));
+      Serial.println(F("1) enter memory value"));
+      Serial.println(F("2) show value at"));
+      Serial.println(F("3) dump memory"));
       if (!hexInputMode)
-        Serial.println("4) switch to HEX input mode");
+        Serial.println(F("4) switch to HEX input mode"));
       if (!binInputMode)
-        Serial.println("5) switch to BIN input mode");
+        Serial.println(F("5) switch to BIN input mode"));
       if (!intInputMode)
-        Serial.println("6) switch to DEC input mode");
-      Serial.println("9) switch programming mode off");
-      Serial.println("");
+        Serial.println(F("6) switch to DEC input mode"));
+      Serial.println(F("7) load example: counter"));
+      Serial.println(F("8) load example: fibonacci numbers"));
+      Serial.println(F("9) load example: square numbers"));
+      Serial.println(F("10) switch programming mode off"));
+      Serial.println();
     }
     int userInput = readInt();
     switch (userInput)
@@ -1227,8 +1239,17 @@ void usbInput()
         hexInputMode = false;
         binInputMode = false;
         intInputMode = true;
+        break; 
+      case 7:
+        loadCounterExample();
+        break;  
+      case 8:
+        loadFibonacciExample();
         break;  
       case 9:
+        loadSquaresExample();
+        break;  
+      case 10:
         USB_PROGRAMMING_MODE = false;
         return;
       default:
@@ -1237,21 +1258,115 @@ void usbInput()
   }
 }
 
+void loadCounterExample()
+{
+  RAM[addressRAM(0, 0)] = 0x31; // LDI 1
+  RAM[addressRAM(0, 1)] = 0x91; // INC 1
+  RAM[addressRAM(0, 2)] = 0x02; // DSPA
+  RAM[addressRAM(0, 3)] = 0xB1; // JMP 1
+}
+
+void loadFibonacciExample()
+{
+  RAM[addressRAM( 0, 0)] = 0x31; // LDI 1
+  RAM[addressRAM( 0, 1)] = 0x4E; // STA E
+  RAM[addressRAM( 0, 2)] = 0x30; // LDI 0
+  RAM[addressRAM( 0, 3)] = 0x02; // DISPA
+  RAM[addressRAM( 0, 4)] = 0x7E; // ADD E
+  RAM[addressRAM( 0, 5)] = 0x4F; // STA F
+  RAM[addressRAM( 0, 6)] = 0x2E; // LDA E
+  RAM[addressRAM( 0, 7)] = 0x4D; // STA D
+  RAM[addressRAM( 0, 8)] = 0x2F; // LDA F
+  RAM[addressRAM( 0, 9)] = 0x4E; // STA E
+  RAM[addressRAM( 0,10)] = 0x2D; // LDA D
+  RAM[addressRAM( 0,11)] = 0xC0; // JC 0
+  RAM[addressRAM( 0,12)] = 0xB3; // JMP 3
+  RAM[addressRAM( 0,13)] = 0x00; // var temp use for swap
+  RAM[addressRAM( 0,14)] = 0x00; // var last fibonacci
+  RAM[addressRAM( 0,15)] = 0x00; // var 2. last fibonacci
+}
+
+void loadSquaresExample()
+{
+  // Main function
+  // calculate and output squares of 1, 2, ...
+  RAM[addressRAM( 0, 0)] = 0x2F; // LDA F
+  RAM[addressRAM( 0, 1)] = 0xF1; // CALL 1
+  RAM[addressRAM( 0, 2)] = 0x02; // DISPA
+  RAM[addressRAM( 0, 3)] = 0x2F; // LDA F
+  RAM[addressRAM( 0, 4)] = 0x91; // INC 1
+  RAM[addressRAM( 0, 5)] = 0x4F; // STA F
+  RAM[addressRAM( 0, 6)] = 0x8E; // SUB E
+  RAM[addressRAM( 0, 7)] = 0xD9; // JZ 9
+  RAM[addressRAM( 0, 8)] = 0xB0; // JMP 0
+  RAM[addressRAM( 0, 9)] = 0x01; // HLT
+  RAM[addressRAM( 0,10)] = 0x00; // 
+  RAM[addressRAM( 0,11)] = 0x00; // 
+  RAM[addressRAM( 0,12)] = 0x00; // 
+  RAM[addressRAM( 0,13)] = 0x00; // 
+  RAM[addressRAM( 0,14)] = 0x10; // var limit
+  RAM[addressRAM( 0,15)] = 0x00; // var counter
+
+  // square function
+  // input:  REG_A = a
+  // output: REG_A = a*a
+  RAM[addressRAM( 1, 0)] = 0x4E; // STA E
+  RAM[addressRAM( 1, 1)] = 0x09; // CPCA
+  RAM[addressRAM( 1, 2)] = 0x4F; // STA F
+  RAM[addressRAM( 1, 3)] = 0x2E; // LDA E
+  RAM[addressRAM( 1, 4)] = 0x05; // CPAB
+  RAM[addressRAM( 1, 5)] = 0xF2; // CALL 2
+  RAM[addressRAM( 1, 6)] = 0x6F; // SWP F
+  RAM[addressRAM( 1, 7)] = 0x06; // CPAC
+  RAM[addressRAM( 1, 8)] = 0x1F; // RETA F
+  RAM[addressRAM( 1, 9)] = 0x00; // 
+  RAM[addressRAM( 1,10)] = 0x00; // 
+  RAM[addressRAM( 1,11)] = 0x00; // 
+  RAM[addressRAM( 1,12)] = 0x00; // 
+  RAM[addressRAM( 1,13)] = 0x00; // 
+  RAM[addressRAM( 1,14)] = 0x00; // var a
+  RAM[addressRAM( 1,15)] = 0x00; // var call backup / square result
+
+  // multiply function
+  // input:  REG_A = a, REG_B = b
+  // output: REG_A = a*b
+  RAM[addressRAM( 2, 0)] = 0x4C; // STA C
+  RAM[addressRAM( 2, 1)] = 0x30; // LDI 0
+  RAM[addressRAM( 2, 2)] = 0x4E; // STA E
+  RAM[addressRAM( 2, 3)] = 0x07; // CPBA
+  RAM[addressRAM( 2, 4)] = 0xA1; // DECR 1
+  RAM[addressRAM( 2, 5)] = 0xCF; // JC F
+  RAM[addressRAM( 2, 6)] = 0x4D; // STA D
+  RAM[addressRAM( 2, 7)] = 0x2E; // LDA E
+  RAM[addressRAM( 2, 8)] = 0x7C; // ADD C
+  RAM[addressRAM( 2, 9)] = 0x4E; // STA E
+  RAM[addressRAM( 2,10)] = 0x2D; // LDA D
+  RAM[addressRAM( 2,11)] = 0xB4; // JMP 4
+  RAM[addressRAM( 2,12)] = 0x00; // C var a
+  RAM[addressRAM( 2,13)] = 0x00; // D var b / remaining rounds
+  RAM[addressRAM( 2,14)] = 0x00; // E var result
+  RAM[addressRAM( 2,15)] = 0x1E; // RETA E
+}
+
+byte addressRAM(byte bank, byte localAddress)
+{
+  return bank*16 + localAddress;
+}
 
 void dumpMemory()
 {
-  Serial.println("####### MEMORY DUMP #########");
-  Serial.println("         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+  Serial.println(F("####### MEMORY DUMP #########"));
+  Serial.println(F("         0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F"));
   for (byte b=0; b<16; b++)
   {
-    Serial.print("BANK ");
+    Serial.print(F("BANK "));
     Serial.print(b, HEX);
     Serial.print(": ");
     for (byte i=0; i<16; i++)
     {
       if (RAM[b*16+ i] < 16)
          Serial.print("0");
-      Serial.print(RAM[b*16+ i], HEX);
+      Serial.print(RAM[addressRAM(b, i)], HEX);
       Serial.print(" ");
     }
     Serial.println();
@@ -1329,6 +1444,13 @@ void printlnTwoCharHex(byte value)
   Serial.println(value, HEX);  
 }
 
+void printTwoCharHex(byte value)
+{
+  if (value < 16)
+    Serial.print("0");
+  Serial.print(value, HEX);  
+}
+
 void usbOutput()
 {
   if (DISABLE_OUTPUT)
@@ -1339,8 +1461,8 @@ void usbOutput()
   {
     if (CLEAR_BEFOR_OUT)
       clearTerminal();
-    Serial.println("###### Ausgabe ######");
-    Serial.print("CONTROLLWORD: ");
+    Serial.println("###### OUTPUT ######");
+    Serial.print("CONTROLLWORD:  . . ");
     if (isPresentInControllword(HLT))
       Serial.print("HLT ");  
     if (isPresentInControllword(MI))
@@ -1391,33 +1513,232 @@ void usbOutput()
   
     Serial.print("INSTRUCTION_CYCLE: ");
     Serial.println(INSTRUCTION_CYCLE, HEX);
-    Serial.print("REG_INSTRUCTION:   ");
-    Serial.println(REG_INSTRUCTION, HEX);
+    Serial.print("REG_INSTRUCTION: . ");
+    printTwoCharHex(REG_INSTRUCTION);
+    printCommandDiscription(REG_INSTRUCTION);
+    Serial.println();
     Serial.print("PROGRAMM_COUNTER:  ");
     Serial.println(PROGRAMM_COUNTER, HEX);
-    Serial.print("BANK ADDRESS:      ");
+    Serial.print("BANK ADDRESS:  . . ");
     Serial.println(BANK_ADDRESS, HEX);
     Serial.print("LOCAL_RAM_ADDRESS: ");
     Serial.println(LOCAL_RAM_ADDRESS, HEX);
-    Serial.print("MEMORY VALUE:      ");
+    Serial.print("MEMORY VALUE:  . . ");
     printlnTwoCharHex(RAM_OUTPUT);
-    Serial.print("CARRY FLAG: ");
+    Serial.print("CARRY FLAG:  . . . ");
     Serial.println(CARRY_FLAG, HEX);
-    Serial.print("ZERO FLAG:  ");
+    Serial.print("ZERO FLAG: . . . . ");
     Serial.println(ZERO_FLAG, HEX);
-    Serial.print("HALT FLAG:  ");
+    Serial.print("HALT FLAG: . . . . ");
     Serial.println(HALT_FLAG, HEX);
-    Serial.print("BUS:        ");
+    Serial.print("BUS:   . . . . . . ");
     printlnTwoCharHex(BUS);
-    Serial.print("REG_A:      ");
+    Serial.print("REG_A: . . . . . . ");
     printlnTwoCharHex(REG_A);
-    Serial.print("REG_B:      ");
+    Serial.print("REG_B: . . . . . . ");
     printlnTwoCharHex(REG_B);
-    Serial.print("REG_SUM:    ");
+    Serial.print("REG_SUM: . . . . . ");
     printlnTwoCharHex(REG_SUM);
-    Serial.print("REG_CALL:   ");
+    Serial.print("REG_CALL:  . . . . ");
     printlnTwoCharHex(REG_C);
-    Serial.print("DISPLAY:    ");
+    printDisplay();
+    Serial.println();
+    if (!DISABLE_MEMORYDUMP)
+      dumpMemory();
+  }
+}
+
+void printCommandDiscription(byte command)
+{
+  if (command <= 0x00)
+  {
+    Serial.print(F(" (NOP)"));
+    return;
+  }
+  if (command <= 0x01)
+  {
+    Serial.print(F(" (HLT)"));
+    return;
+  }
+  if (command <= 0x02)
+  {
+    Serial.print(F(" (DSPA)"));
+    return;
+  }
+  if (command <= 0x03)
+  {
+    Serial.print(F(" (DSPB)"));
+    return;
+  }
+  if (command <= 0x04)
+  {
+    Serial.print(F(" (DSPC)"));
+    return;
+  }
+  if (command <= 0x05)
+  {
+    Serial.print(F(" (CPAB)"));
+    return;
+  }
+  if (command <= 0x06)
+  {
+    Serial.print(F(" (CPAC)"));
+    return;
+  }
+  if (command <= 0x07)
+  {
+    Serial.print(F(" (CPBA)"));
+    return;
+  }
+  if (command <= 0x08)
+  {
+    Serial.print(F(" (CPBC)"));
+    return;
+  }
+  if (command <= 0x09)
+  {
+    Serial.print(F(" (CPCA)"));
+    return;
+  }
+  if (command <= 0x0A)
+  {
+    Serial.print(F(" (CPCB)"));
+    return;
+  }
+  if (command <= 0x0B)
+  {
+    Serial.print(F(" (ZEROB)"));
+    return;
+  }
+  if (command <= 0x0C)
+  {
+    Serial.print(F(" (ZEROC)"));
+    return;
+  }
+  if (command <= 0x0D)
+  {
+    Serial.print(F(" (ADDB)"));
+    return;
+  }
+  if (command <= 0x0E)
+  {
+    Serial.print(F(" (SUBB)"));
+    return;
+  }
+  if (command <= 0x0F)
+  {
+    Serial.print(F(" (RET)"));
+    return;
+  }
+  if (command <= 0x1F)
+  {
+    Serial.print(F(" (RETA "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x2F)
+  {
+    Serial.print(F(" (LDA "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x3F)
+  {
+    Serial.print(F(" (LDI "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x4F)
+  {
+    Serial.print(F(" (STA "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x5F)
+  {
+    Serial.print(F(" (SWBK "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x6F)
+  {
+    Serial.print(F(" (SWP "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x7F)
+  {
+    Serial.print(F(" (ADD "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x8F)
+  {
+    Serial.print(F(" (SUB "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0x9F)
+  {
+    Serial.print(F(" (INC "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0xAF)
+  {
+    Serial.print(F(" (DECR "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0xBF)
+  {
+    Serial.print(F(" (JMP "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0xCF)
+  {
+    Serial.print(F(" (JC "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0xDF)
+  {
+    Serial.print(F(" (JZ "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0xEF)
+  {
+    Serial.print(F(" (CALLD "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+  if (command <= 0xFF)
+  {
+    Serial.print(F(" (CALL "));
+    Serial.print(command&0x0F, HEX);
+    Serial.print(F(")"));
+    return;
+  }
+}
+void printDisplay()
+{
+  Serial.print("DISPLAY: . . . . . ");
     if (USB_NUMBER_MODE && ((OUT_DISPLAY >> 7)&0x01) == 0x01)
     {
       Serial.print("-");
@@ -1425,8 +1746,6 @@ void usbOutput()
     }
     else
       Serial.println(OUT_DISPLAY, DEC);
-    Serial.println();
-  }
 }
 
 void serialOutput()
@@ -1618,6 +1937,74 @@ int readInt()
   return value;
 }
 
+void printControllwordList()
+{
+  Serial.println(F("# CONTROLLWORD LIST #"));
+  Serial.println(F("HLT - halt clock"));
+  Serial.println(F("MI  - memory address register in"));
+  Serial.println(F("RI  - RAM data in"));
+  Serial.println(F("RO  - RAM data out"));
+  Serial.println(F("IO  - instruction register out"));
+  Serial.println(F("II  - instruction register in"));
+  Serial.println(F("AI  - A register in"));
+  Serial.println(F("AO  - A register out"));
+  Serial.println(F("EO  - ALU out"));
+  Serial.println(F("SU  - ALU subtract"));
+  Serial.println(F("BI  - B register in"));
+  Serial.println(F("BO  - B register out"));
+  Serial.println(F("DI  - display register in"));
+  Serial.println(F("PCE - program counter enable"));
+  Serial.println(F("PCO - program counter out"));
+  Serial.println(F("J   - jump (program counter in)"));
+  Serial.println(F("FI  - flags in"));
+  Serial.println(F("BKI - BANK in"));
+  Serial.println(F("BKO - BANK out"));
+  Serial.println(F("CI  - CALL registger in"));
+  Serial.println(F("CBO - CALL register BANK out"));
+  Serial.println(F("CPO - CALL register programm counter out"));
+  Serial.println(F("RSS - reset instruction substep counter"));
+  Serial.println();
+}
+
+void printCommandList()
+{
+  Serial.println(F("#### COMMAND LIST ###"));
+  Serial.println(F("command   binary    HEX  discription"));
+  Serial.println(F(""));
+  Serial.println(F("NOP     0000 0000   00   do nothing"));
+  Serial.println(F("HALT    0000 0001   01   halt the computer"));
+  Serial.println(F("DSPA    0000 0010   02   display A register on display"));
+  Serial.println(F("DSPB    0000 0011   03   display B register on display"));
+  Serial.println(F("DSPC    0000 0100   04   display C register on display"));
+  Serial.println(F("CPAB    0000 0101   05   copy A register to B register"));
+  Serial.println(F("CPAC    0000 0110   06   copy A register to C register"));
+  Serial.println(F("CPBA    0000 0111   07   copy B register to A register"));
+  Serial.println(F("CPBC    0000 1000   08   copy B register to C register"));
+  Serial.println(F("CPCA    0000 1001   09   copy C register to A register"));
+  Serial.println(F("CPCB    0000 1010   0A   copy C register to B register"));
+  Serial.println(F("ZEROB   0000 1011   0B   store zero in B register"));
+  Serial.println(F("ZEROC   0000 1100   0C   store zero in C register"));
+  Serial.println(F("ADDB    0000 1101   0D   store sum of A register and B register in B register"));
+  Serial.println(F("SUBB    0000 1110   0E   store diff from B register to A register in B register"));
+  Serial.println(F("RET     0000 1111   0F   return out of subroutine"));
+  Serial.println(F("RETA    0001 OPT    1_   return out of subroutine, store OPT memory in A register"));
+  Serial.println(F("LDA     0010 OPT    2_   load OPT memory in A register"));
+  Serial.println(F("LDI     0011 OPT    3_   load OPT value in A register"));
+  Serial.println(F("STA     0100 OPT    4_   store A register in OPT memory"));
+  Serial.println(F("SWBK    0101 OPT    5_   switch to BANK OPT"));
+  Serial.println(F("SWP     0110 OPT    6_   swap A register with OPT memory"));
+  Serial.println(F("ADD     0111 OPT    7_   add OPT memory to A register, sum is stored in A register"));
+  Serial.println(F("SUB     1000 OPT    8_   diff A register to OPT memory, diff is stored in A register"));
+  Serial.println(F("INC     1001 OPT    9_   increment A register by OPT"));
+  Serial.println(F("DECR    1010 OPT    A_   decrement A register by OPT"));
+  Serial.println(F("JMP     1011 OPT    B_   jump to operation OPT"));
+  Serial.println(F("JC      1100 OPT    C_   jump to operation OPT, if carry flag is set"));
+  Serial.println(F("JZ      1101 OPT    D_   jump to operation OPT, if zero flag is set"));
+  Serial.println(F("CALLD   1110 OPT    E_   call subr., at A register top nibble as BANK, OPT as memory"));
+  Serial.println(F("CALL    1111 OPT    F_   jump to BANK OPT, PC will be 0, current BANK & PC are stored in C reg."));
+  Serial.println(F(""));
+}
+
 void usbMenu()
 {
   while(true)
@@ -1628,33 +2015,42 @@ void usbMenu()
     {
       if (CLEAR_BEFOR_OUT)
         clearTerminal();
-      Serial.println("###### Main Menu ########");
+      Serial.println(F("###### MAIN MENU ########"));
       if (USB_PROGRAMMING_MODE)
-        Serial.println("1) exit programming mode");
+        Serial.println(F("1) exit programming mode"));
       else
-        Serial.println("1) enter programming mode");  
+        Serial.println(F("1) enter programming mode"));  
       if (USB_MANUAL_CLOCK)
-        Serial.println("2) disable manual clock");
+        Serial.println(F("2) disable manual clock"));
       else
-        Serial.println("2) enable manual clock");
-      Serial.println("3) set clock speed");
+        Serial.println(F("2) enable manual clock"));
+      Serial.println(F("3) set clock speed"));
       if (USB_NUMBER_MODE)
-        Serial.println("4) switch to unsigned number mode");
+        Serial.println(F("4) switch to unsigned number mode"));
       else
-        Serial.println("4) switch to 2. compliment");
-      Serial.println("5) dump memory");
-      Serial.println("6) output signals");
+        Serial.println(F("4) switch to 2. compliment number mode"));
+      Serial.println(F("5) dump memory"));
+      Serial.println(F("6) output signals"));
       if (!USB_PROGRAMMING_MODE)
-        Serial.println("7) start programm");
+        Serial.println(F("7) start programm"));
       if (CLEAR_BEFOR_OUT)
-        Serial.println("8) disable clear before output");
+        Serial.println(F("8) disable clear before output"));
       else
-        Serial.println("8) enable clear before output");
+        Serial.println(F("8) enable clear before output"));
       if (DISABLE_OUTPUT)
-        Serial.println("9) enable output");
+        Serial.println(F("9) enable detailed output"));
       else
-        Serial.println("9) disable output");
-      Serial.println("10) reset all");
+        Serial.println(F("9) disable detailed output"));
+      Serial.println(F("10) reset all"));
+      Serial.println(F("11) show command list"));
+      Serial.println(F("12) show controllword list"));
+      if (!DISABLE_OUTPUT)
+      {
+        if (DISABLE_MEMORYDUMP)
+          Serial.println(F("13) enable memory dump in output"));
+        else
+          Serial.println(F("13) disable memory dump in output"));
+      }
       Serial.println();
     }
 
@@ -1671,7 +2067,7 @@ void usbMenu()
         USB_MANUAL_CLOCK = !USB_MANUAL_CLOCK;
         break;
       case 3:
-        Serial.println("Enter value for clockspeed in ms. (0...1023)");
+        Serial.println(F("Enter additional delay per clockcycle in ms. (0...1023)"));
         Serial.println();
         CLOCK_SPEED = readInt();
         break;
@@ -1688,6 +2084,8 @@ void usbMenu()
         DISABLE_OUTPUT = mem_disable_output;
         break;
       case 7:
+        Serial.println(F("Program startet ..."));
+        Serial.println();
         return;
       case 8:
         CLEAR_BEFOR_OUT = !CLEAR_BEFOR_OUT;
@@ -1697,6 +2095,15 @@ void usbMenu()
         break;
       case 10:
         reset();
+        break;
+      case 11:
+        printCommandList();
+        break;
+      case 12:
+        printControllwordList();
+        break;
+      case 13:
+        DISABLE_MEMORYDUMP = !DISABLE_MEMORYDUMP;
         break;
       default:
         break;
@@ -1766,15 +2173,3 @@ void loop() {
     input(); // enter programming mode
   executeNextCommand();
 }
-
-
-
-
-
-
-
-
-
-
-
-
