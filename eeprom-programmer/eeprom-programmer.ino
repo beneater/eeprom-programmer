@@ -43,6 +43,9 @@ void writeEEPROM(int address, byte data) {
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     pinMode(pin, OUTPUT);
   }
+  
+  // Keep track of msb for polling write completion
+  byte msb = data & 0x80;
 
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     digitalWrite(pin, data & 1);
@@ -51,7 +54,11 @@ void writeEEPROM(int address, byte data) {
   digitalWrite(WRITE_EN, LOW);
   delayMicroseconds(1);
   digitalWrite(WRITE_EN, HIGH);
-  delay(10);
+  
+  byte pollBusy = msb & 0x80;
+  do {
+    pollBusy = readEEPROM(address) & 0x80;
+  } while (pollBusy != msb);
 }
 
 
