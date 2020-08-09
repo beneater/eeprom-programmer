@@ -49,8 +49,13 @@ uint16_t data[] = {
  * Output the address bits and outputEnable signal using shift registers.
  */
 void setAddress(int address, bool outputEnable) {
-  shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, (address >> 8) | (outputEnable ? 0x00 : 0x80));
-  shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, address);
+  address = address & 0x7FFF;
+  
+  byte msb = (address >> 8) | (outputEnable ? 0x00 : 0x80);
+  shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, msb);
+
+  byte lsb = address & 0xFF;
+  shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, lsb);
 
   digitalWrite(SHIFT_LATCH, LOW);
   digitalWrite(SHIFT_LATCH, HIGH);
@@ -67,7 +72,7 @@ byte readEEPROM(int address) {
   }
   setAddress(address, /*outputEnable*/ true);
 
-  byte data = 0;
+  byte data = 0x00;
   for (int pin = EEPROM_D7; pin >= EEPROM_D0; pin -= 1) {
     data = (data << 1) + digitalRead(pin);
   }
@@ -94,24 +99,77 @@ void writeEEPROM(int address, byte data) {
   delay(10);
 }
 
+/**
+ * Clear out the entire EEPROM
+ */
+void eraseEEPROM()
+{
+  Serial.println("Erasing EEPROM");
+  for (int address = 0x0000; address < 0x0800; address++) {
+    writeEEPROM(address, 0xff);
+
+    if (address % 0x40 == 0x00) {
+      Serial.print(".");
+    }
+  }
+  Serial.println("Erasing EEPROM -- Done.");
+  Serial.println();
+}
+
+
+void programEEPROM(byte data[], int length)
+{
+  Serial.println("Programming EEPROM");
+  for (int address = 0x0000; address < length; address++) {
+    writeEEPROM(address, data[address]);    
+
+    if (address % 0x40 == 0x00) {
+      Serial.print(".");
+    }
+  }
+  Serial.println(" Done.");
+  Serial.println();
+}
+
+
+void programEEPROM(uint16_t data[], int offset, int length, bool highByte)
+{
+  Serial.println("Programming EEPROM");
+  for (int address = 0x0000; address < length; address++){
+    byte value = data[address] >> (highByte ? 8 : 0);
+    writeEEPROM(address + offset, value);
+
+    if (address % 0x40 == 0x00) {
+      Serial.print(".");
+    }
+  }
+  Serial.println(" Done.");
+  Serial.println();
+}
+
 
 /*
  * Read the contents of the EEPROM and print them to the serial monitor.
  */
-void printContents() {
-  for (int base = 0; base <= 255; base += 16) {
-    byte data[16];
-    for (int offset = 0; offset <= 15; offset += 1) {
-      data[offset] = readEEPROM(base + offset);
+void printContents(int address) {
+  for (int base = 0x0000; base < 0x0100; base += 0x10) {
+    char buf[20];
+    sprintf(buf, "0x%04x: ", address + base);
+    Serial.print(buf);
+    for (int offset = 0; offset < 0x10; offset += 0x01) {
+      byte data = readEEPROM(address + base + offset);
+      sprintf(buf, "%02x ", data);
+      Serial.print(buf);
+
+      if (offset == 0x07) {
+        Serial.print(" ");
+      }
     }
 
-    char buf[80];
-    sprintf(buf, "%03x:  %02x %02x %02x %02x %02x %02x %02x %02x   %02x %02x %02x %02x %02x %02x %02x %02x",
-            base, data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7],
-            data[8], data[9], data[10], data[11], data[12], data[13], data[14], data[15]);
-
-    Serial.println(buf);
+    Serial.println();
   }
+
+  Serial.println();
 }
 
 
@@ -124,33 +182,18 @@ void setup() {
   pinMode(WRITE_EN, OUTPUT);
   Serial.begin(57600);
 
+  // eraseEEPROM();
+
   // Program data bytes
-  Serial.print("Programming EEPROM");
+  // Program the 8 high-order bits of microcode into the first 0x80 bytes of EEPROM
+  programEEPROM(data, 0x00, sizeof data / sizeof data[0], true);
 
-  // Program the 8 high-order bits of microcode into the first 128 bytes of EEPROM
-  for (int address = 0; address < sizeof(data)/sizeof(data[0]); address += 1) {
-    writeEEPROM(address, data[address] >> 8);
-
-    if (address % 64 == 0) {
-      Serial.print(".");
-    }
-  }
-
-  // Program the 8 low-order bits of microcode into the second 128 bytes of EEPROM
-  for (int address = 0; address < sizeof(data)/sizeof(data[0]); address += 1) {
-    writeEEPROM(address + 128, data[address]);
-
-    if (address % 64 == 0) {
-      Serial.print(".");
-    }
-  }
-
-  Serial.println(" done");
-
+  // Program the 8 low-order bits of microcode into the second 0x80 bytes of EEPROM
+  programEEPROM(data, 0x80, sizeof data / sizeof data[0], false);  
 
   // Read and print out the contents of the EERPROM
   Serial.println("Reading EEPROM");
-  printContents();
+  printContents(0x0000);
 }
 
 
