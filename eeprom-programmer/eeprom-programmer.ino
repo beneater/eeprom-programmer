@@ -34,6 +34,20 @@ byte readEEPROM(int address) {
   return data;
 }
 
+/*
+ * Poll D7 (MSB) until it matches the MSB of data being written
+ * as this indicates a completed write
+ */
+void pollForWriteCompletion(byte data) {
+  pinMode(EEPROM_D7, INPUT);
+  byte currentMSB = 0;
+  byte dataMSB = data & 0x80;
+
+  do {
+      currentMSB = digitalRead(EEPROM_D7) << 7;
+      delay(2);
+  } while ( currentMSB != dataMSB );
+}
 
 /*
  * Write a byte to the EEPROM at the specified address.
@@ -44,14 +58,16 @@ void writeEEPROM(int address, byte data) {
     pinMode(pin, OUTPUT);
   }
 
+  byte dataToWrite = data; // don't modify parameter
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
-    digitalWrite(pin, data & 1);
-    data = data >> 1;
+    digitalWrite(pin, dataToWrite & 1);
+    dataToWrite = dataToWrite >> 1;
   }
   digitalWrite(WRITE_EN, LOW);
   delayMicroseconds(1);
   digitalWrite(WRITE_EN, HIGH);
-  delay(10);
+  
+  pollForWriteCompletion(data);
 }
 
 
