@@ -68,30 +68,31 @@ void initUCode() {
 char bufd[2];
 char bufa[3];
 int line_count = 0;
+int oneTime = -1;
 int addr = 0;
 void writeEEPROM(int address, byte data) {
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
-    sprintf(bufd, "%02x ", data);
-    Serial.print(bufd);
+    if (oneTime == -1) {
+      sprintf(bufd, "%02x ", data);
+      Serial.print(bufd);
+    }
+    oneTime++;
     data = data >> 1;
   }
-  Serial.print("  ");
+  oneTime = -1;
+
   line_count++;
-  if (line_count % 2 == 0) {
+  if (line_count % 8 == 0)
+    Serial.print("  ");
+  if (line_count % 16 == 0) {
     Serial.println("");
-    addr = addr + 16;
-    sprintf(bufa, "%03x:  ", addr);
-    Serial.print(bufa);
   }
 }
 
 void setup() {
   initUCode();
   Serial.begin(2000000);
-char buff[3] ;
-  int zero=0;
-    sprintf(buff, "%03x:  ", zero);
-    Serial.print(buff);
+
   for (int address = 0; address < 1024; address += 1) {
     int flags       = (address & 0b1100000000) >> 8;
     int byte_sel    = (address & 0b0010000000) >> 7;
