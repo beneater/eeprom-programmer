@@ -66,7 +66,7 @@ void initUCode() {
 }
 
 char bufd[2];
-char bufa[3];
+char bufa[8];
 int line_count = 0;
 int oneTime = -1;
 int addr = 0;
@@ -87,8 +87,10 @@ void writeEEPROM(int address, byte data) {
   if (line_count % 16 == 0) {
     Serial.println("");
     addr = addr+16;
-    Serial.print(addr,HEX);
-    Serial.print(":  ");
+//    Serial.print(addr,HEX);
+//    Serial.print(":  ");
+    sprintf(bufa, "%03x: ", addr);
+    Serial.print(bufa);
   }
 }
 
