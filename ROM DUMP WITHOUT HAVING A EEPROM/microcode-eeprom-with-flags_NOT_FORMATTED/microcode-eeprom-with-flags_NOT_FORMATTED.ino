@@ -1,8 +1,8 @@
 /**
- * This sketch programs the microcode EEPROMs for the 8-bit breadboard computer
- * It includes support for a flags register with carry and zero flags
- * See this video for more: https://youtu.be/Zg1NdPKoosU
- */
+   This sketch programs the microcode EEPROMs for the 8-bit breadboard computer
+   It includes support for a flags register with carry and zero flags
+   See this video for more: https://youtu.be/Zg1NdPKoosU
+*/
 #define SHIFT_DATA 2
 #define SHIFT_CLK 3
 #define SHIFT_LATCH 4
@@ -36,22 +36,22 @@
 #define JZ  0b1000
 
 uint16_t UCODE_TEMPLATE[16][8] = {
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 0000 - NOP
-  { MI|CO,  RO|II|CE,  IO|MI,  RO|AI,  0,           0, 0, 0 },   // 0001 - LDA
-  { MI|CO,  RO|II|CE,  IO|MI,  RO|BI,  EO|AI|FI,    0, 0, 0 },   // 0010 - ADD
-  { MI|CO,  RO|II|CE,  IO|MI,  RO|BI,  EO|AI|SU|FI, 0, 0, 0 },   // 0011 - SUB
-  { MI|CO,  RO|II|CE,  IO|MI,  AO|RI,  0,           0, 0, 0 },   // 0100 - STA
-  { MI|CO,  RO|II|CE,  IO|AI,  0,      0,           0, 0, 0 },   // 0101 - LDI
-  { MI|CO,  RO|II|CE,  IO|J,   0,      0,           0, 0, 0 },   // 0110 - JMP
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 0111 - JC
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 1000 - JZ
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 1001
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 1010
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 1011
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 1100
-  { MI|CO,  RO|II|CE,  0,      0,      0,           0, 0, 0 },   // 1101
-  { MI|CO,  RO|II|CE,  AO|OI,  0,      0,           0, 0, 0 },   // 1110 - OUT
-  { MI|CO,  RO|II|CE,  HLT,    0,      0,           0, 0, 0 },   // 1111 - HLT
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 0000 - NOP
+  { MI | CO,  RO | II | CE,  IO | MI,  RO | AI,  0,           0, 0, 0 }, // 0001 - LDA
+  { MI | CO,  RO | II | CE,  IO | MI,  RO | BI,  EO | AI | FI,    0, 0, 0 }, // 0010 - ADD
+  { MI | CO,  RO | II | CE,  IO | MI,  RO | BI,  EO | AI | SU | FI, 0, 0, 0 }, // 0011 - SUB
+  { MI | CO,  RO | II | CE,  IO | MI,  AO | RI,  0,           0, 0, 0 }, // 0100 - STA
+  { MI | CO,  RO | II | CE,  IO | AI,  0,      0,           0, 0, 0 }, // 0101 - LDI
+  { MI | CO,  RO | II | CE,  IO | J,   0,      0,           0, 0, 0 }, // 0110 - JMP
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 0111 - JC
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 1000 - JZ
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 1001
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 1010
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 1011
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 1100
+  { MI | CO,  RO | II | CE,  0,      0,      0,           0, 0, 0 }, // 1101
+  { MI | CO,  RO | II | CE,  AO | OI,  0,      0,           0, 0, 0 }, // 1110 - OUT
+  { MI | CO,  RO | II | CE,  HLT,    0,      0,           0, 0, 0 }, // 1111 - HLT
 };
 
 uint16_t ucode[4][16][8];
@@ -62,21 +62,21 @@ void initUCode() {
 
   // ZF = 0, CF = 1
   memcpy(ucode[FLAGS_Z0C1], UCODE_TEMPLATE, sizeof(UCODE_TEMPLATE));
-  ucode[FLAGS_Z0C1][JC][2] = IO|J;
+  ucode[FLAGS_Z0C1][JC][2] = IO | J;
 
   // ZF = 1, CF = 0
   memcpy(ucode[FLAGS_Z1C0], UCODE_TEMPLATE, sizeof(UCODE_TEMPLATE));
-  ucode[FLAGS_Z1C0][JZ][2] = IO|J;
+  ucode[FLAGS_Z1C0][JZ][2] = IO | J;
 
   // ZF = 1, CF = 1
   memcpy(ucode[FLAGS_Z1C1], UCODE_TEMPLATE, sizeof(UCODE_TEMPLATE));
-  ucode[FLAGS_Z1C1][JC][2] = IO|J;
-  ucode[FLAGS_Z1C1][JZ][2] = IO|J;
+  ucode[FLAGS_Z1C1][JC][2] = IO | J;
+  ucode[FLAGS_Z1C1][JZ][2] = IO | J;
 }
 
 /*
- * Output the address bits and outputEnable signal using shift registers.
- */
+   Output the address bits and outputEnable signal using shift registers.
+*/
 void setAddress(int address, bool outputEnable) {
   shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, (address >> 8) | (outputEnable ? 0x00 : 0x80));
   shiftOut(SHIFT_DATA, SHIFT_CLK, MSBFIRST, address);
@@ -88,8 +88,8 @@ void setAddress(int address, bool outputEnable) {
 
 
 /*
- * Read a byte from the EEPROM at the specified address.
- */
+   Read a byte from the EEPROM at the specified address.
+*/
 byte readEEPROM(int address) {
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     pinMode(pin, INPUT);
@@ -105,9 +105,9 @@ byte readEEPROM(int address) {
 
 
 /*
- * Write a byte to the EEPROM at the specified address.
- */
-     char bufd[2];
+   Write a byte to the EEPROM at the specified address.
+*/
+char bufd[2];
 void writeEEPROM(int address, byte data) {
   setAddress(address, /*outputEnable*/ false);
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
@@ -118,7 +118,7 @@ void writeEEPROM(int address, byte data) {
     digitalWrite(pin, data & 1);
     data = data >> 1;
 
-    sprintf(bufd,"%02x ",data);
+    sprintf(bufd, "%02x ", data);
     Serial.print(bufd);
   }
   Serial.println("");
@@ -130,8 +130,8 @@ void writeEEPROM(int address, byte data) {
 
 
 /*
- * Read the contents of the EEPROM and print them to the serial monitor.
- */
+   Read the contents of the EEPROM and print them to the serial monitor.
+*/
 void printContents(int start, int length) {
   for (int base = start; base < length; base += 16) {
     byte data[16];
@@ -160,8 +160,8 @@ void setup() {
   pinMode(WRITE_EN, OUTPUT);
   Serial.begin(57600);
 
-//  Program data bytes
-//  Serial.print("Programming EEPROM");
+  //  Program data bytes
+  //  Serial.print("Programming EEPROM");
 
   // Program the 8 high-order bits of microcode into the first 128 bytes of EEPROM
   for (int address = 0; address < 1024; address += 1) {
@@ -176,9 +176,9 @@ void setup() {
       writeEEPROM(address, ucode[flags][instruction][step] >> 8);
     }
 
-//    if (address % 64 == 0) {
-//      Serial.print(".");
-//    }
+    //    if (address % 64 == 0) {
+    //      Serial.print(".");
+    //    }
   }
 
   //Serial.println(" done");
@@ -191,6 +191,5 @@ void setup() {
 
 
 void loop() {
-  // put your main code here, to run repeatedly:
 
 }
