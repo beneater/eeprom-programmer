@@ -123,9 +123,9 @@ void writeEEPROM(int address, byte data) {
   }
   Serial.println("");
   digitalWrite(WRITE_EN, LOW);
-  delayMicroseconds(1);
+  //delayMicroseconds(1);
   digitalWrite(WRITE_EN, HIGH);
-  delay(10);
+  //delay(10);
 }
 
 
