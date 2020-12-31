@@ -66,13 +66,24 @@ void initUCode() {
 }
 
 char bufd[2];
+char bufa[3];
+int line_count = 0;
+int oneTime = -1;
+int addr = 0;
 void writeEEPROM(int address, byte data) {
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
-    sprintf(bufd, "%02x ", data);
-    Serial.print(bufd);
+    if (oneTime == -1) {
+      sprintf(bufd, "%02x ", data);
+      Serial.print(bufd);
+    }
+    oneTime++;
     data = data >> 1;
   }
-  Serial.println("");
+  oneTime = -1;
+
+  line_count++;
+  if (line_count % 8 == 0)
+    Serial.println("");
 }
 
 void setup() {
