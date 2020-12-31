@@ -86,12 +86,20 @@ void writeEEPROM(int address, byte data) {
     Serial.print("  ");
   if (line_count % 16 == 0) {
     Serial.println("");
+    addr = addr+16;
+    Serial.print(addr,HEX);
+    Serial.print(":  ");
   }
 }
 
 void setup() {
   initUCode();
   Serial.begin(2000000);
+
+  int zero=0;
+  char buff[3];
+  sprintf(buff,"000: ",zero);
+  Serial.print(buff);
 
   for (int address = 0; address < 1024; address += 1) {
     int flags       = (address & 0b1100000000) >> 8;
