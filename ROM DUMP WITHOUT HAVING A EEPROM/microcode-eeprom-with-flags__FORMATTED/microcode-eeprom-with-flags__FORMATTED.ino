@@ -73,6 +73,7 @@ void writeEEPROM(int address, byte data) {
     Serial.print(bufd);
     data = data >> 1;
   }
+  Serial.print("  ");
   line_count++;
   if(line_count%2 == 0)
   Serial.println("");
