@@ -66,6 +66,7 @@ void initUCode() {
 }
 
 char bufd[2];
+char bufa[3];
 int line_count = 0;
 int addr = 0;
 void writeEEPROM(int address, byte data) {
@@ -78,13 +79,19 @@ void writeEEPROM(int address, byte data) {
   line_count++;
   if (line_count % 2 == 0) {
     Serial.println("");
+    addr = addr + 16;
+    sprintf(bufa, "%03x:  ", addr);
+    Serial.print(bufa);
   }
 }
 
 void setup() {
   initUCode();
   Serial.begin(2000000);
-
+char buff[3] ;
+  int zero=0;
+    sprintf(buff, "%03x:  ", zero);
+    Serial.print(buff);
   for (int address = 0; address < 1024; address += 1) {
     int flags       = (address & 0b1100000000) >> 8;
     int byte_sel    = (address & 0b0010000000) >> 7;
