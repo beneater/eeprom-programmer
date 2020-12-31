@@ -156,9 +156,9 @@ void setup() {
   for (int address = 0; address < sizeof(data)/sizeof(data[0]); address += 1) {
     writeEEPROM(address + 128, data[address]);
 
-    if (address % 64 == 0) {
-      Serial.print(".");
-    }
+//    if (address % 64 == 0) {
+//      Serial.print(".");
+//    }
   }
 
 //  Serial.println(" done");
