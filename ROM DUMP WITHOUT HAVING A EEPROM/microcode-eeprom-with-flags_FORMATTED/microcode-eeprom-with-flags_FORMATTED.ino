@@ -86,9 +86,9 @@ void writeEEPROM(int address, byte data) {
     Serial.print("  ");
   if (line_count % 16 == 0) {
     Serial.println("");
-    addr = addr+16;
-//    Serial.print(addr,HEX);
-//    Serial.print(":  ");
+    addr = addr + 16;
+    //    Serial.print(addr,HEX);
+    //    Serial.print(":  ");
     sprintf(bufa, "%03x: ", addr);
     Serial.print(bufa);
   }
@@ -98,9 +98,24 @@ void setup() {
   initUCode();
   Serial.begin(2000000);
 
-  int zero=0;
+Serial.print("Programming EEPROM");
+
+  for (int address = 0; address < 1024; address += 1) {
+    delayMicroseconds(1);
+    delay(10);
+    
+    if (address % 64 == 0) {
+      Serial.print(".");
+    }
+  }
+
+  Serial.println(" done");
+
+  Serial.println("Reading EEPROM");
+  
+  int zero = 0;
   char buff[3];
-  sprintf(buff,"000: ",zero);
+  sprintf(buff, "000: ", zero);
   Serial.print(buff);
 
   for (int address = 0; address < 1024; address += 1) {
