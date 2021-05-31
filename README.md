@@ -20,4 +20,6 @@ However, I have given the serial dump also if anyone needs the original ROM cont
 
 ![6.png](https://github.com/Subhankar2000/eeprom-programmer-WITHOUT-eeprom/blob/master/blob/6.png?raw=true)
 
-+completed !
+```diff
++ completed
+```
