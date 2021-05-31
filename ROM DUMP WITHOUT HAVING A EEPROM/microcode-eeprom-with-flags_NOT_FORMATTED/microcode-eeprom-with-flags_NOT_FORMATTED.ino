@@ -88,7 +88,7 @@ void writeEEPROM(int address, byte data) {
 
 void setup() {
   initUCode();
-  Serial.begin(2000000);
+  Serial.begin(9600);
 
   for (int address = 0; address < 1024; address += 1) {
     int flags       = (address & 0b1100000000) >> 8;
