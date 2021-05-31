@@ -96,7 +96,7 @@ void writeEEPROM(int address, byte data) {
 
 void setup() {
   initUCode();
-  Serial.begin(57600);
+  Serial.begin(9600);
 
   Serial.print("Programming EEPROM");
 
