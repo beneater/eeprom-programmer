@@ -6,7 +6,7 @@ The .ino files can be used if any one has Arduino hardware lying and can get the
 
 However, I have given the serial dump also if anyone needs the original ROM contents, and the .ino files and .pdsprj files will help one to write their own microcode and get the ROM contents for simulation.
 
-### Here are some screenshots of the properly formatted one as shown in Ben-Eater's video (https://www.youtube.com/watch?v=Zg1NdPKoosU&list=PLowKtXNTBypGqImE405J2565dvjafglHU&index=44) : 
+### Here are some screenshots of the properly formatted one as shown in Ben-Eater's video - 44:Conditional jump instructions (https://www.youtube.com/watch?v=Zg1NdPKoosU&list=PLowKtXNTBypGqImE405J2565dvjafglHU&index=44) : 
 
 ![1.png](https://github.com/Subhankar2000/eeprom-programmer-WITHOUT-eeprom/blob/master/blob/1.png?raw=true)
 
@@ -19,3 +19,5 @@ However, I have given the serial dump also if anyone needs the original ROM cont
 ![5.png](https://github.com/Subhankar2000/eeprom-programmer-WITHOUT-eeprom/blob/master/blob/5.png?raw=true)
 
 ![6.png](https://github.com/Subhankar2000/eeprom-programmer-WITHOUT-eeprom/blob/master/blob/6.png?raw=true)
+
++completed !
