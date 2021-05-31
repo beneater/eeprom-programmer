@@ -94,7 +94,7 @@ void writeEEPROM(int address, byte data) {
 
 void setup() {
   initUCode();
-  Serial.begin(2000000);
+  Serial.begin(9600);
 
   int zero=0;
   char buff[3];
