@@ -1,3 +1,4 @@
+#include <avr/cpufunc.h>
 #define SHIFT_DATA 2
 #define SHIFT_CLK 3
 #define SHIFT_LATCH 4
@@ -49,7 +50,7 @@ void writeEEPROM(int address, byte data) {
     data = data >> 1;
   }
   digitalWrite(WRITE_EN, LOW);
-  delayMicroseconds(1);
+  betterdelay();
   digitalWrite(WRITE_EN, HIGH);
   delay(10);
 }
@@ -124,4 +125,12 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
 
+}
+void betterdelay() {
+_NOP();
+_NOP();
+_NOP();
+_NOP();
+_NOP();
+_NOP();
 }
