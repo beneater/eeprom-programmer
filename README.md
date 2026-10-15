@@ -10,6 +10,7 @@ This is a simple circuit for programming the 28C16, 28C64, 28C256, and similar p
 
 ![Schematic of EEPROM programmer](https://raw.githubusercontent.com/beneater/eeprom-programmer/master/schematic.png)
 
+[Here](wiring.md) is additional information about wiring the programmer to work with all three of these EEPROM types.
 
 ## What’s here?
 

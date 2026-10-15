@@ -1,3 +1,5 @@
+#include "usb_receiver.h"
+
 #define SHIFT_DATA 2
 #define SHIFT_CLK 3
 #define SHIFT_LATCH 4
@@ -46,12 +48,12 @@ void writeEEPROM(int address, byte data) {
 
   for (int pin = EEPROM_D0; pin <= EEPROM_D7; pin += 1) {
     digitalWrite(pin, data & 1);
+    delayMicroseconds(200);
     data = data >> 1;
   }
   digitalWrite(WRITE_EN, LOW);
   delayMicroseconds(1);
   digitalWrite(WRITE_EN, HIGH);
-  delay(10);
 }
 
 
